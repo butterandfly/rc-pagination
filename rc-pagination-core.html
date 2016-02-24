@@ -1,0 +1,170 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<script type="text/javascript">
+Polymer.RCPaginationCoreBehavior = {
+  is: 'rc-pagination',
+
+  properties: {
+    /**
+     * The outputData.
+     * If inputData is exist,
+     * the outputData will be computed by the inputData array,
+     * currentPage and countPerPage.
+     */
+    outputData: {
+      type: Array,
+      notify: true
+    },
+
+    /**
+     * The inputData.
+     */
+    inputData: {
+      type: Array,
+      notify: true,
+      observer: '_observeInputData'
+    },
+
+    /**
+     * The current selected page.
+     */
+    selectedPage: {
+      type: Number,
+      value: 1,
+      notify: true,
+      observer: '_observeSelectedPage'
+    },
+
+    /**
+     * The item count of every page.
+     * The default value is 10.
+     */
+    perPage: {
+      type: Number,
+      value: 10,
+      notify: true,
+      observer: '_observePerPage'
+    },
+
+    /**
+     * The total count of all data.
+     * If the inputData is exist, this property will dynamic change by the inputData.
+     */
+    total: {
+      type: Number,
+      notify: true,
+      observer: '_observeTotal'
+    },
+
+    pageCount: {
+      type: Number,
+      notify: true,
+      computed: '_computePageCount(pageItems)'
+    },
+
+    pageItems: {
+      type: Array,
+      value: [1],
+      notify: true
+    }
+  },
+
+  /**
+   * Select the pre page.
+   * The min selectedPage is 1.
+   */
+  prePage: function() {
+    var current = this.selectedPage;
+    current--;
+    if (current < 1) {
+      current = 1;
+    }
+    this.selectedPage = current;
+  },
+
+  /**
+   * Select the next page.
+   * The max selectedPage equals pagaeCount.
+   */
+  nextPage: function() {
+    var current = this.selectedPage;
+    current++;
+    if (current > this.pageCount) {
+      current = this.pageCount;
+    }
+    this.selectedPage = current;
+  },
+
+  // The observer of `total`
+  _observeTotal: function() {
+    var pageItems = [];
+    var pageCount = (this.total / this.perPage) + 1;
+    var i;
+    for (i = 1; i <= pageCount; i++) {
+      pageItems.push(i);
+    }
+    this.pageItems = pageItems;
+  },
+
+  _computePageCount: function(pageItems) {
+    return pageItems.length;
+  },
+
+  // Observer of `selectedPage`.
+  // Will fire the `page-info-update` event.
+  _observeSelectedPage: function() {
+    this.fire('page-info-update', {
+      selectedPage: this.selectedPage,
+      perPage: this.perPage
+    }, {bubbles: false});
+
+    if (!this.inputData || !this.selectedPage) {
+      return;
+    }
+
+    this._generateOutputData();
+  },
+
+  _observePerPage: function(newVal) {
+    if (!this.inputData || !newVal) {
+      return;
+    }
+
+    this.selectedPage = 1;
+
+    this._generateOutputData();
+    this._generatePageCount();
+  },
+
+  // Observer of `inputData`.
+  _observeInputData: function(newVal) {
+    this.total = newVal.length;
+    this._generateOutputData();
+  },
+
+  _generatePageCount: function() {
+    var pageItems = [];
+    var pageCount = (this.total / this.perPage) + 1;
+    var i;
+    for (i = 1; i <= pageCount; i++) {
+      pageItems.push(i);
+    }
+    this.pageItems = pageItems;
+  },
+
+  _generateOutputData: function() {
+    var input = this.inputData;
+    var output = [];
+    var start = (this.selectedPage - 1) * this.perPage;
+    var i;
+    for (i = start; i < start + parseInt(this.perPage); i++) {
+      var d = input[i];
+      if (!d) {
+        break;
+      }
+      output.push(d);
+    }
+    this.outputData = output;
+  }
+};
+</script>

@@ -1,0 +1,83 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../../bower_components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="../../bower_components/iron-dropdown/iron-dropdown.html">
+
+<link rel="import" href="./rc-pagination-core.html">
+
+<dom-module id="rc-pagination">
+  <template>
+    <style>
+      :host {
+        display: flex;
+        justify-content: flex-end;
+        position: relative;
+      }
+
+      paper-dropdown-menu {
+        width: 60px;
+        padding: 0 5px;
+      }
+
+      paper-item {
+        width: 27px;
+      }
+    </style>
+    <div>
+      perPage:
+      <paper-dropdown-menu vertical-align="bottom" horizontal-align="right" value="{{perPage}}">
+        <paper-menu  class="dropdown-content" selected="0">
+          <paper-item>10</paper-item>
+          <paper-item>20</paper-item>
+        </paper-menu>
+      </paper-dropdown-menu>
+
+      <paper-icon-button id="pre" icon="chevron-left" on-tap="prePage"></paper-icon-button>
+
+
+      <paper-dropdown-menu id="pageItemsDropdown"
+                           vertical-align="bottom"
+                           horizontal-align="right"
+                           value="{{selectedPage}}">
+        <paper-menu id="pageItemsMenu" class="dropdown-content" selected="{{selectedPageMenuItem}}">
+          <template is="dom-repeat" items="{{pageItems}}">
+            <paper-item>{{item}}</paper-item>
+          </template>
+        <paper-menu>
+      </paper-dropdown-menu>
+
+      / {{pageCount}}
+
+      <paper-icon-button id="next" icon="chevron-right" on-tap="nextPage"></paper-icon-button>
+    </div>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'rc-pagination',
+      behaviors: [Polymer.RCPaginationCoreBehavior],
+
+      properties: {
+        /**
+         * The selected index of page menu.
+         */
+        selectedPageMenuItem: {
+          type: String,
+          computed: 'computeSelectedPageMenuItem(selectedPage)'
+        }
+      },
+
+      computeSelectedPageMenuItem: function(selectedPage) {
+        return parseInt(selectedPage) - 1;
+      }
+
+    });
+  })();
+  </script>
+</dom-module>

@@ -1,0 +1,170 @@
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>rc-pagination</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../iron-test-helpers/mock-interactions.js"></script>
+
+  <link rel="import" href="../rc-pagination.html">
+
+</head>
+<body>
+
+<test-fixture id="basic">
+  <template>
+    <rc-pagination></rc-pagination>
+  </template>
+</test-fixture>
+
+<script>
+  var suite = window.suite;
+  var test = window.test;
+  var assert = window.assert;
+  var setup = window.setup;
+  var fixture = window.fixture;
+
+  suite('rc-pagination tests', function() {
+    var element;
+
+    setup(function() {
+      element = fixture('basic');
+    });
+
+    test('has default selectedPage', function() {
+      assert.equal(element.selectedPage, 1);
+    });
+
+    test('has default perPage', function() {
+      assert.equal(element.perPage, 10);
+    });
+
+    test('has default pageItems', function() {
+      assert.equal(element.pageItems.length, 1);
+      assert.equal(element.pageItems[0], 1);
+    });
+
+    test('has `undefined` inputData and outputData', function() {
+      assert.notOk(element.inputData);
+      assert.notOk(element.outputData);
+    });
+
+    test('got new pageItems by total changed', function() {
+      element.total = 22;
+      assert.equal(element.pageItems.length, 3);
+      assert.equal(element.pageItems[2], 3);
+    });
+
+    test('got new total by inputData changed', function() {
+      element.inputData = ['hi', 'hello'];
+      assert.equal(element.total, 2);
+    });
+
+    test('has the correct pageCount', function() {
+      assert.equal(element.pageCount, 1);
+      element.total = 22;
+      assert.equal(element.pageCount, 3);
+      element.total = 102;
+      assert.equal(element.pageCount, 11);
+    });
+
+    test('update output by changing the selectedPage and inputData', function() {
+      var inputTestData = [];
+      var i;
+      for (i = 1; i < 33; i++) {
+        inputTestData.push(i);
+      }
+
+      element.inputData = inputTestData;
+      assert.equal(element.outputData.length, 10);
+      assert.equal(element.outputData[8], 9);
+
+      element.selectedPage = 4;
+      assert.equal(element.outputData.length, 2);
+      assert.equal(element.outputData[0], 31);
+    });
+
+    test('do not update outputData by the selectedPage untill the inputData is not empty', function() {
+      element.selectedPage = 2;
+      assert.notOk(element.outputData);
+    });
+
+    test('page-info-update event', function(done) {
+      var element = fixture('basic');
+      element.addEventListener('page-info-update', function(event) {
+        var detail = event.detail;
+        assert.ok(detail);
+        assert.equal(detail.selectedPage, 2);
+        assert.equal(detail.perPage, 20);
+        done();
+      });
+
+      setTimeout(function() {
+        assert.ok(false, 'Time out! There is no `page-info-update` event fired.');
+        done();
+      }, 5000);
+
+      element.total = 100;
+      element.perPage = 20;
+      element.selectedPage = 2;
+    });
+
+    // -------- rc-pagination -------
+
+    // test('the default dropdown of pageItemsMenu is 1', function() {
+      // TODO: Not pass
+      // var pager = fixture('basic');
+      // var dropdown = pager.$$('#pageItemsDropdown');
+      // assert.equal(dropdown.value, 1);
+
+    // });
+
+    // test('change selectedPage by selecting the menu item', function() {
+    //   // TODO: Finished this test
+    // });
+
+    test('change selecting item by pre button', function(done) {
+
+      var el = fixture('basic');
+      el.total = 73;
+      el.selectedPage = 3;
+
+      var preBtn = el.$.pre;
+      window.MockInteractions.tap(preBtn);
+      assert.equal(el.selectedPage, '2');
+      assert.equal(el.$.pageItemsMenu.selected, 1);
+
+      done();
+
+    });
+
+    test('change selecting item by next button', function(done) {
+
+      var el = fixture('basic');
+      el.total = 73;
+      el.selectedPage = '3';
+
+      var nextBtn = el.$.next;
+      window.MockInteractions.tap(nextBtn);
+      assert.equal(el.selectedPage, '4');
+      assert.equal(el.$.pageItemsMenu.selected, 3);
+
+      done();
+
+    });
+
+    // function runAfterOpen(menu, callback) {
+    //   menu.$.menuButton.$.dropdown.addEventListener('iron-overlay-opened', function() {
+    //     Polymer.Base.async(callback, 1);
+    //   });
+    //   window.MockInteractions.tap(menu);
+    // }
+
+  });
+</script>
+
+</body>
+</html>
